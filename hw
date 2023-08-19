@@ -1,0 +1,36 @@
+#include <iostream>
+#include <thread>
+#include <vector>
+
+void sum(std::vector<int>& v, int start, int end, int& result) {
+  for (int i = start; i < end; i++) {
+    result += v[i];
+  }
+}
+
+int main() {
+  std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  int num_threads = 2;
+  int chunk_size = v.size() / num_threads;
+  std::vector<int> results(num_threads);
+  std::vector<std::thread> threads(num_threads);
+
+  for (int i = 0; i < num_threads; i++) {
+    int start = i * chunk_size;
+    int end = (i == num_threads - 1) ? v.size() : start + chunk_size;
+    threads[i] = std::thread(sum, std::ref(v), start, end, std::ref(results[i]));
+  }
+
+  for (int i = 0; i < num_threads; i++) {
+    threads[i].join();
+  }
+
+  int total = 0;
+  for (int i = 0; i < num_threads; i++) {
+    total += results[i];
+  }
+
+  std::cout << "Total sum: " << total << std::endl;
+
+  return 0;
+}
